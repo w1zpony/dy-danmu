@@ -38,15 +38,10 @@ func (model *User) Insert() error {
 func (model *User) CheckAndInsert() error {
 	var existingUser User
 	// 查找该用户最新的一条记录
-	if err := DB.Where("user_id = ?", model.UserID).
+	if err := DB.Where("user_id = ? AND user_name = ? AND display_id = ?", model.UserID, model.UserName, model.DisplayID).
 		Order("id DESC").
 		First(&existingUser).Error; err == nil {
-		// 用户存在，检查信息是否相同
-		if existingUser.UserName == model.UserName &&
-			existingUser.DisplayID == model.DisplayID {
-			// 信息完全相同，直接返回
-			return nil
-		}
+		return nil
 	}
 	// 用户不存在或信息有变化，插入新记录
 	return model.Insert()

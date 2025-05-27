@@ -48,25 +48,14 @@ func NewDouyinLive(conf *model.LiveConf) (*DouyinLive, error) {
 	}
 	d.c.SetUserAgent(ua)
 	d.c.SetTimeout(time.Second * 10)
-	//初始化ttwid
-	if err := d.fetchTTWID(); err != nil {
-		return nil, fmt.Errorf("获取 TTWID 失败: %w", err)
-	}
+
 	//设置requset.Client header用于获取roomInfo
 	d.c.SetCommonHeaders(map[string]string{
 		"accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 		"accept-language": "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3",
 	})
-	d.c.SetCommonCookies(&http.Cookie{
-		Name:  "ttwid",
-		Value: d.ttwid,
-	})
-	d.c.SetRedirectPolicy(req.NoRedirectPolicy())
 
-	//设置websocket header
-	d.headers = http.Header{}
-	d.headers.Add("user-agent", d.userAgent)
-	d.headers.Add("cookie", fmt.Sprintf("ttwid=%s", d.ttwid))
+	d.c.SetRedirectPolicy(req.NoRedirectPolicy())
 
 	//初始化去重lru cache
 	var err error
@@ -76,7 +65,6 @@ func NewDouyinLive(conf *model.LiveConf) (*DouyinLive, error) {
 	}
 
 	d.enable.Store(conf.Enable)
-	d.pushid = utils.GetUserUniqueID()
 
 	// 加载 JavaScript 脚本
 	err = jsScript.LoadGoja(d.userAgent)
@@ -141,6 +129,22 @@ func (d *DouyinLive) Start() {
 		return
 	}
 	defer d.mu.Unlock()
+	defer d.Close()
+
+	err := d.fetchTTWID()
+	if err != nil {
+		logger.Warn().Msg("fetch ttwid error")
+		return
+	}
+	d.c.SetCommonCookies(&http.Cookie{
+		Name:  "ttwid",
+		Value: d.ttwid,
+	})
+	//设置websocket header
+	d.headers = http.Header{}
+	d.headers.Add("user-agent", d.userAgent)
+	d.headers.Add("cookie", fmt.Sprintf("ttwid=%s", d.ttwid))
+	d.pushid = utils.GetUserUniqueID()
 
 	logger.Info().Str("liveurl", d.liveurl).Msg("Start DouyinLive")
 	d.wssurl = d.StitchUrl()

@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/elliotchance/orderedmap"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -66,6 +67,9 @@ func GenerateMsToken(length int) string {
 
 // MatchMethod 根据方法名匹配并返回对应的ProtoMessage
 func MatchMethod(method string) (protoreflect.ProtoMessage, error) {
+	if !utf8.ValidString(method) {
+		return nil, errors.New("非法 UTF-8 字符串")
+	}
 	if createMessage, ok := generated.MessageMap[method]; ok {
 		return createMessage(), nil
 	}

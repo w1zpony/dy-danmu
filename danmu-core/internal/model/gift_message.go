@@ -36,7 +36,38 @@ func (*GiftMessage) TableName() string {
 	return TableNameGiftMessage
 }
 
+var specialGifts = map[string]uint32{
+	"嘉年华": 30000,
+	"热气球": 520,
+	"邮轮":  6000,
+	"火箭":  10001,
+	"飞艇":  20000,
+	"飞机":  3000,
+	"跑车":  1200,
+	"秘境":  13140,
+	"兔兔":  299,
+}
+
+func getDiamondGiftPrice(giftName string) uint32 {
+	if !strings.HasPrefix(giftName, "钻石") {
+		return 0
+	}
+
+	remainingPart := strings.TrimPrefix(giftName, "钻石")
+
+	if count, exists := specialGifts[remainingPart]; exists {
+		return count
+	}
+
+	return 0 // No match found
+}
+
 func NewGiftMessage(message *douyin.GiftMessage) *GiftMessage {
+	diamondCount := message.Gift.DiamondCount
+
+	additionalCount := getDiamondGiftPrice(message.Gift.Name)
+	diamondCount += additionalCount
+
 	model := &GiftMessage{
 		UserID:        message.User.Id,
 		UserName:      message.User.NickName,
@@ -45,7 +76,7 @@ func NewGiftMessage(message *douyin.GiftMessage) *GiftMessage {
 		RoomID:        message.Common.RoomId,
 		Message:       message.Common.Describe,
 		Timestamp:     message.Common.CreateTime,
-		DiamondCount:  message.Gift.DiamondCount,
+		DiamondCount:  diamondCount,
 		Image:         message.Gift.Image.Url,
 		RepeatEnd:     message.RepeatEnd,
 		GiftID:        message.GiftId,
