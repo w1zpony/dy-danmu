@@ -1,12 +1,14 @@
 # danmu-core
 
-> 抖音直播的弹幕和礼物抓取，并存储至数据库
+> 抖音直播的弹幕和礼物抓取
 
 **示例:**
 
-![](image/common-message.png)
-![](image/gift-message.png)
-![](image/template.png)
+![16.png](image%2F16.png)
+![17.png](image%2F17.png)
+![18.png](image%2F18.png)
+![19.png](image%2F19.png)
+![20.png](image%2F20.png)
 
 ## 详情
 
@@ -31,15 +33,6 @@
 ![](image/10.png)
 ![](image/11.png)
 ![](image/12.png)
-
-实际开发中发现websocket服务端会不定时的断开连接，直播关闭后也只是发送了一个关闭ws连接的信号，如果此时发送心跳的话依然可以接受到pong回应。无法正确判断直播是否关闭，也不能正确判断是否开播。最终参考`biliup`代码，由新的协程周期性的检测直播状态，控制websocket连接的开始和停止。
-
-![](image/13.png)
-![](image/14.png)
-
-该请求返回值包含status代码，2则为正在直播。另外导出了rpc接口供其他程序控制弹幕监控协程。
-
-![](image/15.png)
 
 
 
@@ -69,13 +62,7 @@
 ## danmu-http danmu-ui
 > 基于golang gin gorm grpc的后端管理 + vite vue3 element-plus tailwindcss的前端ui。实现对danmu-core存储的数据查看以及计算。
 
-**示例:**
 
-![16.png](image%2F16.png)
-![17.png](image%2F17.png)
-![18.png](image%2F18.png)
-![19.png](image%2F19.png)
-![20.png](image%2F20.png)
 
 
 
@@ -84,7 +71,6 @@
 ### not yet:
 
 - [ ] 数据库自动migrate
-- [ ] 引入cron表达式，控制监听周期
 - [ ] 添加Makefile
 - [ ] 添加dockerfile docker-compose.yml
 
