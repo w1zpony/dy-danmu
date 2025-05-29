@@ -4,6 +4,7 @@ import { getGiftRanking } from '../api/gift_message'
 import type { UserGift } from '../types/models/gift_message'
 import TimeRangePicker from './TimeRangePicker.vue'
 import ToUserSelect from './ToUserSelect.vue'
+import GiftReceiverRanking from './GiftReceiverRanking.vue'
 import dayjs from 'dayjs'
 
 const props = defineProps<{
@@ -109,6 +110,8 @@ function formatTime(timestamp: number) {
 function getSortedGiftList(gifts: UserGift['gift_list']) {
   return [...gifts].sort((a, b) => b.timestamp - a.timestamp)
 }
+
+// 计算礼物总金额
 </script>
 
 <template>
@@ -128,6 +131,9 @@ function getSortedGiftList(gifts: UserGift['gift_list']) {
         查询
       </el-button>
     </div>
+
+    <!-- 礼物接收排行榜 -->
+    <GiftReceiverRanking :user-gifts="giftList" />
 
     <!-- 礼物排行列表 -->
     <div

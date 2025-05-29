@@ -6,41 +6,73 @@ const { handleLogout, isAdmin, authName, navigation } = useNavbar()
 </script>
 
 <template>
-  <div class="fixed top-0 left-0 right-0 bg-indigo-600 h-14 px-4 z-50">
-    <div class="max-w-7xl mx-auto h-full">
-      <div class="flex justify-between items-center h-full">
-        <!-- 左侧导航菜单 -->
-        <div class="flex items-center space-x-2">
-          <router-link 
-            v-for="item in navigation"
-            :key="item.path"
-            :to="item.path"
-            v-show="!item.requireAdmin || isAdmin"
-            class="flex items-center px-4 py-2 bg-indigo-700 rounded-md text-white hover:bg-indigo-800 transition-colors"
-          >
-            <el-icon class="mr-1">
-              <component :is="item.icon" ></component>
-            </el-icon>
-            <span>{{ item.name }}</span>
-          </router-link>
+  <div class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 h-14 z-50">
+    <div class="h-full flex items-center">
+      <!-- Logo -->
+      <router-link 
+        to="/home" 
+        class="flex items-center gap-2 hover:opacity-80 transition-all px-4"
+      >
+        <img 
+          src="/NUNU.png" 
+          alt="Logo" 
+          class="h-7 w-7"
+        />
+        <div class="flex items-center">
+          <span class="text-lg font-bold text-[#409EFF]">Danmu</span>
+          <span class="text-lg font-bold text-orange-500">Nu</span>
+          <span class="text-xs align-top text-orange-500">+</span>
         </div>
+      </router-link>
 
-        <!-- 右侧用户菜单 -->
+      <!-- 导航菜单 -->
+      <div class="flex items-center">
+        <router-link 
+          to="/home"
+          class="flex items-center px-3 py-2 text-gray-500 hover:text-gray-900 relative border-b-2 border-transparent transition-colors"
+          :class="{ 'text-gray-900 border-current nav-active': $route.path === '/home' }"
+        >
+          <span class="font-medium">首页</span>
+        </router-link>
+        
+        <router-link 
+          to="/users"
+          v-if="isAdmin"
+          class="flex items-center px-3 py-2 text-gray-500 hover:text-gray-900 relative border-b-2 border-transparent transition-colors"
+          :class="{ 'text-gray-900 border-current nav-active': $route.path.includes('users') }"
+        >
+          <span class="font-medium">用户管理</span>
+        </router-link>
+        
+        <router-link 
+          v-for="item in navigation.filter(n => !['home', 'users'].includes(n.path.slice(1)))"
+          :key="item.path"
+          :to="item.path"
+          v-show="!item.requireAdmin || isAdmin"
+          class="flex items-center px-3 py-2 text-gray-500 hover:text-gray-900 relative border-b-2 border-transparent transition-colors"
+          :class="{ 'text-gray-900 border-current nav-active': $route.path.includes(item.path.slice(1)) }"
+        >
+          <span class="font-medium">{{ item.name }}</span>
+        </router-link>
+      </div>
+
+      <!-- 用户菜单 - 靠右对齐 -->
+      <div class="ml-auto pr-4">
         <el-dropdown trigger="click">
-          <div class="flex items-center px-4 py-2 bg-indigo-700 rounded-md text-white hover:bg-indigo-800 cursor-pointer transition-colors">
-            <el-icon class="mr-1"><User /></el-icon>
-            <span>{{ authName }}</span>
+          <div class="flex items-center px-3 py-1.5 text-gray-700 cursor-pointer transition-all border rounded-md hover:bg-gray-50">
+            <el-icon class="mr-2"><User /></el-icon>
+            <span class="font-medium max-w-[120px] truncate">{{ authName }}</span>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>
-                <router-link to="/profile" class="text-gray-700">个人资料</router-link>
+                <router-link to="/profile" class="text-gray-700 font-medium">个人资料</router-link>
               </el-dropdown-item>
               <el-dropdown-item v-if="isAdmin">
-                <router-link to="/users" class="text-gray-700">用户管理</router-link>
+                <router-link to="/users" class="text-gray-700 font-medium">用户管理</router-link>
               </el-dropdown-item>
               <el-dropdown-item divided>
-                <span class="text-red-600 block w-full" @click="handleLogout">登出</span>
+                <span class="text-red-600 font-medium block w-full" @click="handleLogout">登出</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -51,13 +83,12 @@ const { handleLogout, isAdmin, authName, navigation } = useNavbar()
 </template>
 
 <style scoped>
-:deep(.el-menu) {
-  --el-menu-bg-color: transparent;
-  --el-menu-text-color: white;
-  --el-menu-hover-bg-color: rgba(255, 255, 255, 0.1);
+.nav-active {
+  border-color: #f97316;  /* Tailwind's orange-500 color */
 }
 
-:deep(.el-menu-item) {
-  --el-menu-active-color: white;
+.router-link-active {
+  color: rgb(17 24 39);  /* text-gray-900 */
+  border-color: #f97316;
 }
 </style> 

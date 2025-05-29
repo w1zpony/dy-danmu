@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { getToUsers } from '../api/gift_message'
 import type { User } from '../types/models/user'
 import { Refresh } from '@element-plus/icons-vue'
@@ -37,6 +37,11 @@ async function fetchUsers() {
       },
       ...res.data.data
     ]
+    
+    // 在数据加载后应用滚动样式
+    nextTick(() => {
+      applyScrollStyles()
+    })
   } catch (error) {
     console.error('[ToUsers] Fetch error:', error)
   }
@@ -47,7 +52,26 @@ function handleSelectChange(values: number[]) {
   emit('update:modelValue', values)  // 添加这行，确保更新父组件
 }
 
-onMounted(fetchUsers)
+// 手动应用滚动样式
+function applyScrollStyles() {
+  const dropdowns = document.querySelectorAll('.user-select-dropdown .el-scrollbar__wrap')
+  dropdowns.forEach(dropdown => {
+    if (dropdown instanceof HTMLElement) {
+      dropdown.style.maxHeight = '300px'
+      dropdown.style.overflowY = 'auto'
+    }
+  })
+}
+
+onMounted(() => {
+  fetchUsers()
+  
+  // 监听下拉菜单打开事件
+  document.addEventListener('click', (e) => {
+    // 延迟一点时间确保下拉菜单已经渲染
+    setTimeout(applyScrollStyles, 100)
+  })
+})
 </script>
 
 <template>
@@ -102,11 +126,6 @@ onMounted(fetchUsers)
 <style>
 .width-240px {
   min-width: 280px;  /* 增加宽度以适应两个 tag */
-}
-
-.user-select-dropdown .el-select-dropdown__wrap {
-  max-height: none;
-  padding: 0;
 }
 
 .user-select-dropdown .el-select-dropdown__list {

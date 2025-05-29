@@ -1,12 +1,13 @@
 import axios from 'axios';
+import { useAuthStore } from '../stores/auth';
 import router from '../router/router';
 import { ElMessage } from 'element-plus';
-import type { ApiResponse} from '../types/response';
+import type { ApiResponse } from '../types/response';
 import { computed } from 'vue';
-import { useAuthStore } from '../stores/auth';
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
-  timeout: 5000,
+  timeout: 50000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -33,11 +34,15 @@ api.interceptors.response.use(
     ElMessage.error(res.message || '操作失败');
     return Promise.reject(new Error(res.message || '操作失败'));
   },
-  error => {
-    // 处理 HTTP 错误
+  async error => {
     if (error.response?.status === 401) {
-      router.push('/login');
-      ElMessage.error('请先登录');
+      const authStore = useAuthStore();
+      
+      await authStore.logout();
+      
+      if (router.currentRoute.value.path !== '/login') {
+        await router.push('/login');
+      }
     } else if (error.code === 'ECONNABORTED') {
       ElMessage.error('请求超时，请稍后重试');
     } else {

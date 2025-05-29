@@ -13,7 +13,7 @@ import (
 
 var (
 	taskList map[int64]*DouyinTask
-	mu       sync.RWMutex
+	muMap    map[int64]*sync.Mutex
 )
 
 type DouyinTask struct {
@@ -25,6 +25,7 @@ func InitDouyinManager() {
 	logger.Info().Msg("INIT DOYIN MANAGER")
 	taskList = make(map[int64]*DouyinTask)
 	confs, err := model.GetAllLiveConf()
+	muMap = make(map[int64]*sync.Mutex, len(taskList))
 	if err != nil {
 		logger.Fatal().Err(err).Msg("get live conf failed")
 	}
@@ -44,13 +45,14 @@ func InitDouyinManager() {
 			live: dylive,
 			conf: conf,
 		}
+		muMap[conf.ID] = &sync.Mutex{}
 	}
 	go checkAllLiveTimer()
 }
 
 func AddDouyinTask(conf *model.LiveConf) error {
-	mu.Lock()
-	defer mu.Unlock()
+	muMap[conf.ID].Lock()
+	defer muMap[conf.ID].Unlock()
 	if _, ok := taskList[conf.ID]; ok {
 		logger.Warn().Interface("conf", conf).Msg("[Add]task already exist")
 		return fmt.Errorf("live task already exists: %s", conf.RoomDisplayID)
@@ -82,8 +84,8 @@ func AddDouyinTask(conf *model.LiveConf) error {
 }
 
 func DeleteDouyinTask(id int64) error {
-	mu.Lock()
-	defer mu.Unlock()
+	muMap[id].Lock()
+	defer muMap[id].Unlock()
 	task, ok := taskList[id]
 	if !ok {
 		logger.Info().Msg("[Delete]delete live task fail, task doesn't exist")
@@ -96,8 +98,8 @@ func DeleteDouyinTask(id int64) error {
 }
 
 func UpdateDouyinTask(conf *model.LiveConf) error {
-	mu.Lock()
-	defer mu.Unlock()
+	muMap[conf.ID].Lock()
+	defer muMap[conf.ID].Unlock()
 	task, ok := taskList[conf.ID]
 	if !ok {
 		logger.Info().Interface("conf", conf).Msg("[Update] task not found, create new task")
@@ -148,23 +150,23 @@ func checkAllLiveTimer() {
 	for {
 		logger.Info().Msg("BEGIN TO CHECK ALL LIVE")
 		for _, task := range taskList {
+			muMap[task.conf.ID].Lock()
 			if !task.conf.Enable {
 				continue
 			}
 			utils.SafeRun(func() {
-				isLive, err := task.live.CheckStream()
-				if err != nil {
-					logger.Warn().Err(err)
-					return
-				}
-				if isLive {
-					logger.Info().Str("url", task.conf.URL).Msg("CheckStream: live is living")
-					go utils.SafeRun(task.live.Start)
+				if isLive, err := task.live.CheckStream(); err != nil {
+					if isLive {
+						logger.Info().Str("url", task.conf.URL).Msg("CheckStream: live is living")
+						go utils.SafeRun(task.live.Start)
+					} else {
+						logger.Info().Str("url", task.conf.URL).Msg("CheckStream: live is closed")
+					}
 				} else {
-					logger.Info().Str("url", task.conf.URL).Msg("CheckStream: live is closed")
-					task.live.Close()
+					logger.Warn().Err(err)
 				}
 			})
+			muMap[task.conf.ID].Unlock()
 		}
 		time.Sleep(time.Minute * 10)
 	}

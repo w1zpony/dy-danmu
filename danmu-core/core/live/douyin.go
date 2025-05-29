@@ -87,11 +87,16 @@ func (d *DouyinLive) SetEnable(enable bool) error {
 
 	// Set the new value and take appropriate action
 	if enable {
-		_, err := d.CheckStream()
-		if err != nil {
-			return err
+		if isLive, err := d.CheckStream(); err != nil {
+			if isLive {
+				logger.Info().Str("url", d.liveurl).Msg("CheckStream: live is living")
+				go utils.SafeRun(d.Start)
+			} else {
+				logger.Info().Str("url", d.liveurl).Msg("CheckStream: live is closed")
+			}
+		} else {
+			logger.Warn().Err(err)
 		}
-		go utils.SafeRun(d.Start)
 		d.enable.Store(true)
 	} else {
 		d.Stop()
@@ -126,10 +131,10 @@ func (d *DouyinLive) Start() {
 		return
 	}
 	if !d.mu.TryLock() {
+		logger.Info().Str("get lock false", "start get lock false")
 		return
 	}
 	defer d.mu.Unlock()
-	defer d.Close()
 
 	err := d.fetchTTWID()
 	if err != nil {
@@ -149,8 +154,7 @@ func (d *DouyinLive) Start() {
 	logger.Info().Str("liveurl", d.liveurl).Msg("Start DouyinLive")
 	d.wssurl = d.StitchUrl()
 	d.recvMsgChan = make(chan *douyin.Response, 100)
-	defer d.isLive.Store(false)
-	defer close(d.recvMsgChan)
+	defer d.Close()
 
 	for d.enable.Load() && d.isLive.Load() {
 		if !d.reconnect(1) {
@@ -327,6 +331,7 @@ func (d *DouyinLive) Close() {
 	if d.cancelFunc != nil {
 		d.cancelFunc()
 	}
+	d.isLive.Store(false)
 	if d.gzip != nil {
 		err := d.gzip.Close()
 		d.gzip = nil
@@ -336,8 +341,6 @@ func (d *DouyinLive) Close() {
 			logger.Info().Str("liveurl", d.liveurl).Msg("gzip关闭")
 		}
 	}
-	d.connMu.Lock()
-	defer d.connMu.Unlock()
 	if d.Conn != nil {
 		err := d.Conn.Close()
 		d.Conn = nil

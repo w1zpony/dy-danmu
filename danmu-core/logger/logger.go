@@ -20,7 +20,6 @@ func Init() {
 	if err := os.MkdirAll(setting.LogSetting.LogSavePath, 0755); err != nil {
 		panic(fmt.Sprintf("create log directory failed: %v", err))
 	}
-
 	// 配置日志分片
 	fileLogger := &lumberjack.Logger{
 		Filename:   filepath.Join(setting.LogSetting.LogSavePath, setting.LogSetting.LogFileName),
@@ -29,24 +28,26 @@ func Init() {
 		MaxAge:     setting.LogSetting.MaxAge,
 		Compress:   setting.LogSetting.Compress,
 	}
-
 	// 设置日志级别
 	level := getLogLevel(setting.LogSetting.LogLevel)
-
 	// 设置时间格式
 	zerolog.TimeFieldFormat = setting.LogSetting.TimeFormat
-
-	// 配置带颜色的控制台输出
-	consoleWriter := zerolog.ConsoleWriter{
-		Out:        os.Stdout,
-		TimeFormat: setting.LogSetting.TimeFormat,
-		NoColor:    false,
+	var writer zerolog.LevelWriter
+	if level == zerolog.DebugLevel {
+		// 配置带颜色的控制台输出
+		consoleWriter := zerolog.ConsoleWriter{
+			Out:        os.Stdout,
+			TimeFormat: setting.LogSetting.TimeFormat,
+			NoColor:    false,
+		}
+		// 同时输出到控制台和文件
+		writer = zerolog.MultiLevelWriter(consoleWriter, fileLogger)
+	} else {
+		writer = zerolog.MultiLevelWriter(fileLogger)
 	}
-	// 同时输出到控制台和文件
-	multi := zerolog.MultiLevelWriter(consoleWriter, fileLogger)
 
 	// 初始化全局日志记录器
-	Logger = zerolog.New(multi).
+	Logger = zerolog.New(writer).
 		Level(level).
 		With().
 		Timestamp().
@@ -98,7 +99,6 @@ func Fatal() *zerolog.Event {
 	return Logger.Fatal()
 }
 
-// 使用示例:
 // logger.Info().
 //     Str("key", "value").
 //     Int("count", 42).

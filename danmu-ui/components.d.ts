@@ -35,7 +35,7 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     GiftMessage: typeof import('./src/components/GiftMessage.vue')['default']
     GiftRanking: typeof import('./src/components/GiftRanking.vue')['default']
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    GiftReceiverRanking: typeof import('./src/components/GiftReceiverRanking.vue')['default']
     MobileNavbar: typeof import('./src/components/mobile/MobileNavbar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

@@ -1,20 +1,29 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-sm w-full bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+    <div class="max-w-sm w-full bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <!-- Logo and Title -->
-      <div class="text-center">
-        <h2 class="mt-4 text-xl font-medium text-gray-900">
-          danmu-nu
-        </h2>
+      <div class="text-center space-y-4">
+        <div class="flex flex-col items-center">
+          <img 
+            src="/NUNU.png" 
+            alt="Logo" 
+            class="h-16 w-16 mb-3"
+          />
+          <div class="flex items-center">
+            <span class="text-2xl font-bold text-[#409EFF]">Danmu</span>
+            <span class="text-2xl font-bold text-orange-500">Nu</span>
+            <span class="text-sm align-top text-orange-500">+</span>
+          </div>
+        </div>
       </div>
 
       <!-- Login Form -->
-      <el-form @submit.prevent="handleLogin" class="mt-6 space-y-4">
+      <el-form @submit.prevent="handleLogin" class="mt-8">
         <el-form-item>
           <el-input
             v-model="loginForm.email"
             type="text"
-            class="rounded-md !h-10"
+            class="!rounded-md !h-10"
             placeholder="请输入邮箱"
           />
         </el-form-item>
@@ -23,17 +32,18 @@
           <el-input
             v-model="loginForm.password"
             type="password"
-            class="!h-10"
+            class="!rounded-md !h-10"
             placeholder="请输入密码"
           />
         </el-form-item>
+
         <el-button
           type="primary"
           :loading="isLoading"
-          class="w-full !h-10"
+          class="w-full !h-10 !rounded-md !bg-[#409EFF] hover:!bg-[#337ecc] !border-transparent font-medium text-sm"
           @click="handleLogin"
         >
-          登录
+          {{ isLoading ? '登录中...' : '登 录' }}
         </el-button>
       </el-form>
     </div>
@@ -74,4 +84,24 @@ async function handleLogin() {
   }
 }
 </script>
+
+<style scoped>
+:deep(.el-input__wrapper) {
+  background-color: #f9fafb;
+  border-color: transparent;
+  box-shadow: none !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+  background-color: #f3f4f6;
+}
+
+:deep(.el-input__inner) {
+  color: #374151;
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: #9ca3af;
+}
+</style>
 
