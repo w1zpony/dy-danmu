@@ -51,12 +51,11 @@ func InitDouyinManager() {
 }
 
 func AddDouyinTask(conf *model.LiveConf) error {
-	muMap[conf.ID].Lock()
-	defer muMap[conf.ID].Unlock()
 	if _, ok := taskList[conf.ID]; ok {
 		logger.Warn().Interface("conf", conf).Msg("[Add]task already exist")
 		return fmt.Errorf("live task already exists: %s", conf.RoomDisplayID)
 	}
+	muMap[conf.ID] = &sync.Mutex{}
 	dylive, err := live.NewDouyinLive(conf)
 	if err != nil {
 		logger.Warn().Err(err).Interface("conf", conf).Msg("[Add]Create douyinLive fail")
@@ -84,6 +83,10 @@ func AddDouyinTask(conf *model.LiveConf) error {
 }
 
 func DeleteDouyinTask(id int64) error {
+	if _, ok := muMap[id]; ok {
+		logger.Info().Msg("[Delete]delete live task fail, task doesn't exist")
+		return fmt.Errorf("task not found: %d", id)
+	}
 	muMap[id].Lock()
 	defer muMap[id].Unlock()
 	task, ok := taskList[id]
@@ -93,11 +96,16 @@ func DeleteDouyinTask(id int64) error {
 	}
 	task.live.Stop()
 	delete(taskList, id)
+	delete(muMap, id)
 	logger.Info().Str("room_display_id", task.conf.RoomDisplayID).Str("room_name", task.conf.Name).Msg("[Delete]delete live task success")
 	return nil
 }
 
 func UpdateDouyinTask(conf *model.LiveConf) error {
+	if _, ok := muMap[conf.ID]; ok {
+		logger.Info().Msg("[Update]update live task fail, task doesn't exist")
+		return fmt.Errorf("task not found: %d", conf.ID)
+	}
 	muMap[conf.ID].Lock()
 	defer muMap[conf.ID].Unlock()
 	task, ok := taskList[conf.ID]
@@ -150,12 +158,12 @@ func checkAllLiveTimer() {
 	for {
 		logger.Info().Msg("BEGIN TO CHECK ALL LIVE")
 		for _, task := range taskList {
-			muMap[task.conf.ID].Lock()
 			if !task.conf.Enable {
 				continue
 			}
+			muMap[task.conf.ID].Lock()
 			utils.SafeRun(func() {
-				if isLive, err := task.live.CheckStream(); err != nil {
+				if isLive, err := task.live.CheckStream(); err == nil {
 					if isLive {
 						logger.Info().Str("url", task.conf.URL).Msg("CheckStream: live is living")
 						go utils.SafeRun(task.live.Start)

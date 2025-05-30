@@ -87,7 +87,7 @@ func (d *DouyinLive) SetEnable(enable bool) error {
 
 	// Set the new value and take appropriate action
 	if enable {
-		if isLive, err := d.CheckStream(); err != nil {
+		if isLive, err := d.CheckStream(); err == nil {
 			if isLive {
 				logger.Info().Str("url", d.liveurl).Msg("CheckStream: live is living")
 				go utils.SafeRun(d.Start)
