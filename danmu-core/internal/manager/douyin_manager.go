@@ -168,6 +168,7 @@ func checkAllLiveTimer() {
 						logger.Info().Str("url", task.conf.URL).Msg("CheckStream: live is living")
 						go utils.SafeRun(task.live.Start)
 					} else {
+						task.live.Stop()
 						logger.Info().Str("url", task.conf.URL).Msg("CheckStream: live is closed")
 					}
 				} else {

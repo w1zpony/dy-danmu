@@ -92,6 +92,7 @@ func (d *DouyinLive) SetEnable(enable bool) error {
 				logger.Info().Str("url", d.liveurl).Msg("CheckStream: live is living")
 				go utils.SafeRun(d.Start)
 			} else {
+				d.Stop()
 				logger.Info().Str("url", d.liveurl).Msg("CheckStream: live is closed")
 			}
 		} else {
