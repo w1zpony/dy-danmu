@@ -113,10 +113,6 @@ func (d *DouyinLive) SetEnable(enable bool) error {
 
 // 外部设置enable=false
 func (d *DouyinLive) Stop() {
-	if !d.enable.CompareAndSwap(true, false) {
-		logger.Info().Str("liveurl", d.liveurl).Msg("DouyinLive is not running")
-		return
-	}
 	if d.cancelFunc != nil {
 		d.cancelFunc()
 	}
