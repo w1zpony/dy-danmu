@@ -47,7 +47,7 @@
 
 1. 在posgtgresql中执行 `cmd/sql/migrate.sql`
 2. 修改编写conf/app.ini，配置数据库连接
-3. 向live-conf表中插入直播监听配置，项目启动后会从live-conf表获取所有的监听任务 
+3. 若单独运行core执行监听任务的话需要向live-conf表中插入直播监听配置，项目启动后会从live-conf表获取所有的监听任务, http ui core全部部署的话则直接在前端插入数据即可
 ```sql
     insert into live.live_confs ( room_display_id, url, name, enable)
     values (
