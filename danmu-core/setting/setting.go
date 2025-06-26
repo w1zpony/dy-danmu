@@ -49,9 +49,6 @@ var configPath string
 
 func init() {
 	flag.StringVar(&configPath, "config", "conf/app.ini", "path to config file")
-}
-
-func Init() {
 	flag.Parse()
 
 	var err error

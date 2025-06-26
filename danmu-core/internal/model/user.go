@@ -1,7 +1,7 @@
 package model
 
 import (
-	"danmu-core/generated/douyin"
+	"danmu-core/generated/dystruct"
 )
 
 const TableNameUser = "users"
@@ -18,11 +18,11 @@ func (*User) TableName() string {
 	return TableNameUser
 }
 
-func NewUser(user *douyin.User) *User {
+func NewUser(user *dystruct.Webcast_Data_User) *User {
 	return &User{
 		UserID:    user.Id,
 		DisplayID: user.DisplayId,
-		UserName:  user.NickName,
+		UserName:  user.Nickname,
 	}
 }
 

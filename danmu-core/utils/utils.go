@@ -3,57 +3,14 @@ package utils
 import (
 	"bytes"
 	"compress/gzip"
-	"crypto/md5"
-	"danmu-core/generated"
-	"danmu-core/generated/douyin"
 	"danmu-core/logger"
 	"encoding/base64"
-	"encoding/hex"
-	"errors"
 	"fmt"
 	"math/rand"
 	"runtime"
 	"runtime/debug"
 	"strconv"
-	"strings"
-	"time"
-	"unicode/utf8"
-
-	"github.com/elliotchance/orderedmap"
-	"google.golang.org/protobuf/reflect/protoreflect"
 )
-
-// HasGzipEncoding 判断消息头中是否包含gzip编码
-func HasGzipEncoding(headers []*douyin.HeadersList) bool {
-	for _, header := range headers {
-		if header.Key == "compress_type" && header.Value == "gzip" {
-			return true
-		}
-	}
-	return false
-}
-
-// GetxMSStub 拼接map并返回其MD5哈希值的十六进制字符串
-func GetxMSStub(params *orderedmap.OrderedMap) string {
-	var sigParams strings.Builder
-	for i, key := range params.Keys() {
-		if i > 0 {
-			sigParams.WriteString(",")
-		}
-		value, _ := params.Get(key)
-		sigParams.WriteString(fmt.Sprintf("%s=%s", key, value))
-	}
-	hash := md5.Sum([]byte(sigParams.String()))
-	return hex.EncodeToString(hash[:])
-}
-
-// getUserID 生成随机用户ID
-func getUserID() string {
-	// 生成7300000000000000000到7999999999999999999之间的随机数
-	randomNumber := rand.Int63n(7000000000000000000 + 1)
-	// 将整数转换为字符串
-	return strconv.FormatInt(randomNumber, 10)
-}
 
 // GenerateMsToken 生成随机的msToken
 func GenerateMsToken(length int) string {
@@ -63,17 +20,6 @@ func GenerateMsToken(length int) string {
 		b[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(b) + "=_"
-}
-
-// MatchMethod 根据方法名匹配并返回对应的ProtoMessage
-func MatchMethod(method string) (protoreflect.ProtoMessage, error) {
-	if !utf8.ValidString(method) {
-		return nil, errors.New("非法 UTF-8 字符串")
-	}
-	if createMessage, ok := generated.MessageMap[method]; ok {
-		return createMessage(), nil
-	}
-	return nil, errors.New("未知消息: " + method)
 }
 
 // GzipCompressAndBase64Encode 将数据进行gzip压缩并进行Base64编码
@@ -91,26 +37,6 @@ func GzipCompressAndBase64Encode(data []byte) (string, error) {
 	return base64.StdEncoding.EncodeToString(b.Bytes()), nil
 }
 
-// NewOrderedMap 创建一个有序的map
-func NewOrderedMap(roomID, pushID string) *orderedmap.OrderedMap {
-	smap := orderedmap.NewOrderedMap()
-	smap.Set("live_id", "1")
-	smap.Set("aid", "6383")
-	smap.Set("version_code", "180800")
-	smap.Set("webcast_sdk_version", "1.0.14-beta.0")
-	smap.Set("room_id", roomID)
-	smap.Set("sub_room_id", "")
-	smap.Set("sub_channel_id", "")
-	smap.Set("did_rule", "3")
-	smap.Set("user_unique_id", pushID)
-	smap.Set("device_platform", "web")
-	smap.Set("device_type", "")
-	smap.Set("ac", "")
-	smap.Set("identity", "audience")
-	return smap
-}
-
-// RandomUserAgent 生成随机的浏览器用户代理字符串
 func RandomUserAgent() string {
 	osList := []string{
 		"(Windows NT 10.0; WOW64)", "(Windows NT 10.0; Win64; x64)",
@@ -132,11 +58,8 @@ func RandomUserAgent() string {
 }
 
 func GetUserUniqueID() string {
-	// 创建一个新的随机数生成器，使用当前时间戳作为种子
-	randSource := rand.NewSource(time.Now().UnixNano())
-	randGen := rand.New(randSource)
-	randomNum := randGen.Int63n(7000000000000000000) + 7300000000000000000
-	return fmt.Sprintf("%d", randomNum)
+	id := rand.Int63n(7999999999999999999-7300000000000000000+1) + 7300000000000000000
+	return strconv.FormatInt(id, 10)
 }
 
 func SafeRun(f func()) {

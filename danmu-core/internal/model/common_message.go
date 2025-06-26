@@ -10,14 +10,14 @@ const TableNameCommonMessage = "common_messages"
 type CommonMessage struct {
 	ID             uint64 `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	MessageType    string `gorm:"column:message_type;not null" json:"message_type"`
-	RoomID         int64  `gorm:"column:room_id;not null" json:"room_id"`
+	RoomID         uint64 `gorm:"column:room_id;not null" json:"room_id"`
 	RoomDisplayId  string `gorm:"column:room_display_id;not null" json:"room_display_id"`
 	RoomName       string `gorm:"column:room_name;not null" json:"room_name"`
 	UserName       string `gorm:"column:user_name;not null" json:"user_name"`
 	UserID         uint64 `gorm:"column:user_id;not null" json:"user_id"`
 	UserDisplayId  string `gorm:"column:user_display_id;not null" json:"user_display_id"`
 	Content        string `gorm:"column:content;not null" json:"content"`
-	Timestamp      int64  `gorm:"column:timestamp;not null" json:"timestamp"`
+	Timestamp      uint64 `gorm:"column:timestamp;not null" json:"timestamp"`
 	FavoriteUserId uint64 `gorm:"column:favorite_user_id;default:0" json:"favorite"`
 }
 

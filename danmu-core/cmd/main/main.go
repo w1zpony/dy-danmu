@@ -1,11 +1,10 @@
 package main
 
 import (
-	"danmu-core/internal/manager"
+	"danmu-core/core"
 	"danmu-core/internal/model"
 	"danmu-core/internal/server"
 	"danmu-core/logger"
-	"danmu-core/setting"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,10 +15,7 @@ func init() {
 }
 
 func main() {
-	setting.Init()
-	logger.Init()
-	model.Init()
-	manager.InitDouyinManager()
+	core.InitTaskManager()
 	rpcserver := server.NewRPCServer()
 	err := rpcserver.Start()
 	if err != nil {
@@ -30,12 +26,10 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	// 等待退出信号
 	<-quit
 	logger.Info().Msg("Shutting down server...")
 
 	rpcserver.Stop()
-	manager.CloseDouyinManager()
 	model.Close()
 
 	logger.Info().Msg("Server exited")

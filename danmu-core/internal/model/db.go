@@ -11,7 +11,7 @@ import (
 
 var DB *gorm.DB
 
-func Init() {
+func init() {
 	var dsn = fmt.Sprintf("user=%s password=%s host=%s dbname=%s port=%s sslmode=disable search_path=%s",
 		setting.DatabaseSetting.User,
 		setting.DatabaseSetting.Password,

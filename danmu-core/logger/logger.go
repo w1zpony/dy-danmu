@@ -14,8 +14,7 @@ import (
 
 var Logger zerolog.Logger
 
-// Init 初始化日志配置
-func Init() {
+func init() {
 	// 创建日志目录
 	if err := os.MkdirAll(setting.LogSetting.LogSavePath, 0755); err != nil {
 		panic(fmt.Sprintf("create log directory failed: %v", err))

@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
+	"danmu-core/core"
 	"danmu-core/generated/api"
-	"danmu-core/internal/manager"
 	"danmu-core/internal/model"
 )
 
@@ -24,7 +24,7 @@ func (s *LiveServer) AddTask(ctx context.Context, req *api.LiveConf) (*api.Respo
 		Enable:        req.Enable,
 	}
 
-	if err := manager.AddDouyinTask(conf); err != nil {
+	if err := core.Add(conf); err != nil {
 		return &api.Response{
 			Code:    400,
 			Message: err.Error(),
@@ -38,7 +38,7 @@ func (s *LiveServer) AddTask(ctx context.Context, req *api.LiveConf) (*api.Respo
 }
 
 func (s *LiveServer) DeleteTask(ctx context.Context, req *api.TaskID) (*api.Response, error) {
-	if err := manager.DeleteDouyinTask(req.Id); err != nil {
+	if err := core.Delete(req.Id); err != nil {
 		return &api.Response{
 			Code:    400,
 			Message: err.Error(),
@@ -60,7 +60,7 @@ func (s *LiveServer) UpdateTask(ctx context.Context, req *api.LiveConf) (*api.Re
 		Enable:        req.Enable,
 	}
 
-	if err := manager.UpdateDouyinTask(conf); err != nil {
+	if err := core.Update(conf); err != nil {
 		return &api.Response{
 			Code:    400,
 			Message: err.Error(),
