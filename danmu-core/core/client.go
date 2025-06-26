@@ -30,7 +30,7 @@ type MsgHandler interface {
 	Handle(msg interface{}) error
 }
 
-const DefaultCron = "0 */1 * * * *"
+const DefaultCron = "0 */15 * * * *"
 
 type Client struct {
 	liveurl    string
