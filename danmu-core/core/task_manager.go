@@ -19,6 +19,9 @@ type Task struct {
 	RecvChan chan interface{}
 }
 
+// todo 提供修改cron表达式功能
+// todo 提供unsubscribe handler功能，用于变动直播间名字时重新订阅handler
+// todo 添加cookie自定义
 func InitTaskManager() {
 	confs, err := model.GetAllLiveConf()
 	if err != nil {

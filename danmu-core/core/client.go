@@ -22,7 +22,7 @@ import (
 type Platform interface {
 	GetHeartbeatValue() (interval time.Duration, hb []byte)
 	GetWsInfo() (url string, headers http.Header, err error)
-	DecodeMsg(data []byte, recvMsg chan interface{}) (ack []byte, err error)
+	DecodeMsg(data []byte, recvMsg chan interface{}, ctx context.Context, cf context.CancelFunc) (ack []byte, err error)
 	CheckStream() (bool, error)
 }
 
@@ -30,7 +30,7 @@ type MsgHandler interface {
 	Handle(msg interface{}) error
 }
 
-const DefaultCron = "0 */15 * * * *"
+const DefaultCron = "0 0/15 * * * ?"
 
 type Client struct {
 	liveurl    string
@@ -305,7 +305,7 @@ func (c *Client) fetchMessage() {
 			if msgType != websocket.BinaryMessage || len(data) == 0 {
 				continue
 			}
-			ack, err := c.p.DecodeMsg(data, c.RecvMsg)
+			ack, err := c.p.DecodeMsg(data, c.RecvMsg, c.ctx, c.cancelFunc)
 			if err != nil {
 				logger.Info().Str("liveurl", c.liveurl).Err(err).Msg("Parse data error")
 				continue
@@ -329,6 +329,7 @@ func (c *Client) processMsg() {
 		case response, ok := <-c.RecvMsg:
 			if !ok {
 				logger.Info().Str("liveurl", c.liveurl).Msg("Channel closed, Stop ProcessingRecvMessage()")
+				c.RecvMsg = nil
 				return
 			}
 			c.emit(response)

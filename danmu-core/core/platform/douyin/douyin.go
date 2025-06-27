@@ -2,6 +2,7 @@ package platform
 
 import (
 	"bytes"
+	"context"
 	"danmu-core/core/platform/douyin/jsScript"
 	"danmu-core/generated/douyin"
 	"danmu-core/generated/dystruct"
@@ -75,7 +76,7 @@ func (dy *Douyin) GetWsInfo() (url string, headers http.Header, err error) {
 	return url, headers, err
 }
 
-func (dy *Douyin) DecodeMsg(data []byte, recvMsg chan interface{}) (ack []byte, err error) {
+func (dy *Douyin) DecodeMsg(data []byte, RecvChan chan interface{}, ctx context.Context, cf context.CancelFunc) (ack []byte, err error) {
 	var pushFrame dystruct.Webcast_Im_PushFrame
 	if err := proto.Unmarshal(data, &pushFrame); err != nil {
 		return nil, fmt.Errorf("unmarshal push frame error: %w", err)
@@ -91,8 +92,23 @@ func (dy *Douyin) DecodeMsg(data []byte, recvMsg chan interface{}) (ack []byte, 
 		return nil, fmt.Errorf("unmarshal response error: %w", err)
 	}
 
+	needClose := false
 	for _, msg := range response.Messages {
-		recvMsg <- msg
+		if msg.Method == WebcastControlMessage {
+			controlMsg := &douyin.ControlMessage{}
+			err := proto.Unmarshal(msg.Payload, controlMsg)
+			if err != nil {
+				logger.Warn().Err(err).Msg("解析protobuf失败")
+				continue
+			}
+			if controlMsg.Status == 3 || controlMsg.Status == 4 {
+				needClose = true
+			}
+		}
+		RecvChan <- msg
+	}
+	if needClose {
+		cf()
 	}
 
 	var ackData []byte
