@@ -91,28 +91,9 @@ func (dy *Douyin) DecodeMsg(data []byte, recvMsg chan interface{}) (ack []byte, 
 		return nil, fmt.Errorf("unmarshal response error: %w", err)
 	}
 
-	go func() {
-		var closeF = false
-		for _, msg := range response.Messages {
-			if msg.Method == WebcastControlMessage {
-				controlMsg := &douyin.ControlMessage{}
-				err := proto.Unmarshal(msg.Payload, controlMsg)
-				if err != nil {
-					logger.Warn().Err(err).Msg("解析protobuf失败")
-					continue
-				}
-				if controlMsg.Status == 3 || controlMsg.Status == 4 {
-					closeF = true
-					continue
-				}
-			}
-			recvMsg <- msg
-		}
-		if closeF {
-			logger.Info().Str("liveurl", dy.liveurl).Msg("msg.Status为3|4，关闭ws链接")
-			close(recvMsg)
-		}
-	}()
+	for _, msg := range response.Messages {
+		recvMsg <- msg
+	}
 
 	var ackData []byte
 	if response.NeedAck {

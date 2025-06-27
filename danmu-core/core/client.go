@@ -217,7 +217,7 @@ func (c *Client) run() {
 			c.cancelFunc()
 		}()
 		wg.Wait()
-		if c.enable.Load() || c.isLive.Load() {
+		if c.enable.Load() && c.isLive.Load() {
 			c.checkStreamTask()
 		}
 	}
