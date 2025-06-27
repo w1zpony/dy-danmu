@@ -345,7 +345,7 @@ func (c *Client) checkStreamTask() {
 		Str("liveurl", c.liveurl).
 		Msgf("CheckStream: %v", isLive)
 	if isLive {
-		c.run()
+		go c.run()
 	} else {
 		c.close()
 	}
