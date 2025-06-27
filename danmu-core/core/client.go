@@ -163,6 +163,7 @@ func (c *Client) close() {
 
 	if c.RecvMsg != nil {
 		close(c.RecvMsg)
+		c.RecvMsg = nil
 	}
 
 	logger.Info().Str("liveurl", c.liveurl).Msg("客户端已关闭")
