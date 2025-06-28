@@ -21,7 +21,10 @@ type Task struct {
 
 // todo 提供修改cron表达式功能
 // todo 提供unsubscribe handler功能，用于变动直播间名字时重新订阅handler
+// todo handler改为可配置，添加rpc接口
 // todo 添加cookie自定义
+// todo 修改初始化，支持distributed多节点部署，动态负载均衡
+// todo 修改platform和handler获取方式，使用plugin特性动态加载，可不重新启动项目就能动态加载新的Platform和handler
 func InitTaskManager() {
 	confs, err := model.GetAllLiveConf()
 	if err != nil {

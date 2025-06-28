@@ -98,34 +98,6 @@ func HasGzipEncoding(headers []*dystruct.Webcast_Im_PushHeader) bool {
 	return false
 }
 
-func BuildRequestURL(ua string, rawURL string) (string, error) {
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		return "", err
-	}
-
-	queryParams := parsedURL.Query()
-
-	queryParams.Set("aid", "6383")
-	queryParams.Set("device_platform", "web")
-	queryParams.Set("browser_language", "zh-CN")
-	queryParams.Set("browser_platform", "Win32")
-
-	browserName := strings.Split(ua, "/")[0]
-	queryParams.Set("browser_name", browserName)
-
-	tempSplit := strings.Split(ua, browserName)
-	browserVersion := ""
-	if len(tempSplit) > 1 {
-		browserVersion = strings.TrimPrefix(tempSplit[len(tempSplit)-1], "/")
-	}
-	queryParams.Set("browser_version", browserVersion)
-
-	parsedURL.RawQuery = queryParams.Encode()
-
-	return parsedURL.String(), nil
-}
-
 // NewSigMap 创建一个有序的map
 func NewSigMap(roomID, uniqueId string) *orderedmap.OrderedMap {
 	smap := orderedmap.NewOrderedMap()
