@@ -102,40 +102,7 @@ func (h *Dymsg2dbHandler) saveToDB(msg protoreflect.ProtoMessage, method string,
 			Content:       fmt.Sprintf("[%v]: %v", m.User.Nickname, m.Content),
 			Timestamp:     m.EventTime,
 		}
-		/*	case live.WebcastMemberMessage:
-				m := msg.(*douyin.MemberMessage)
-				common = &model.CommonMessage{
-					MessageType:   method,
-					UserName:      m.User.NickName,
-					UserID:        m.User.ShortId,
-					UserDisplayId: m.User.DisplayId,
-					RoomID:        m.Common.RoomId,
-					Content:       fmt.Sprintf("%v 来了, 人数 %v", m.User.NickName, m.MemberCount),
-					Timestamp:     time.Now().Unix(),
-				}
-			case live.WebcastSocialMessage:
-				m := msg.(*douyin.SocialMessage)
-				common = &model.CommonMessage{
-					MessageType:   method,
-					UserName:      m.User.NickName,
-					UserID:        m.User.ShortId,
-					UserDisplayId: m.User.DisplayId,
-					RoomID:        m.Common.RoomId,
-					Content:       fmt.Sprintf("%v 关注了，Follow Count: %v", m.User.NickName, m.FollowCount),
-					Timestamp:     time.Now().Unix(),
-				}*/
 
-		/*	case live.WebcastLikeMessage:
-			m := msg.(*douyin.LikeMessage)
-			common = &model.CommonMessage{
-				MessageType:   method,
-				UserName:      m.User.NickName,
-				UserID:        m.User.ShortId,
-				UserDisplayId: m.User.DisplayId,
-				RoomID:        m.Common.RoomId,
-				Content:       fmt.Sprintf("%v 为主播点赞， Total: %v", m.User.NickName, m.Total),
-				Timestamp:     time.Now().Unix(),
-			}*/
 	default:
 		return nil
 	}
