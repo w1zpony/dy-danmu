@@ -77,9 +77,12 @@ func NewGiftMessage(message *dystruct.Webcast_Im_GiftMessage) *GiftMessage {
 		Message:       message.Common.Describe,
 		Timestamp:     message.Common.CreateTime,
 		DiamondCount:  diamondCount,
-		Image:         message.Gift.Image.Uri,
 		RepeatEnd:     message.RepeatEnd,
 		GiftID:        int64(message.GiftId),
+	}
+	imageList := message.Gift.Image.UrlList
+	if imageList != nil && len(imageList) > 0 {
+		model.Image = imageList[0]
 	}
 	if message.ToUser != nil {
 		model.ToUserID = message.ToUser.Id

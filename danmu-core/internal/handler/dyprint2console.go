@@ -37,37 +37,9 @@ func (h *DyPrint2Console) Handle(msg interface{}) error {
 func (h *DyPrint2Console) print(msg protoreflect.ProtoMessage, method string, id uint64) error {
 	var content string
 	switch method {
-	/*case platform.WebcastGiftMessage:
-	m := msg.(*dystruct.Webcast_Im_GiftMessage)
-	// 先处理用户信息
-	user := model.NewUser(m.User)
-	if err := user.CheckAndInsert(); err != nil {
-		logger.Warn().Err(err).Msg("Failed to process user")
-		// 不返回错误，继续处理礼物消息
-	}
-
-	if m.RepeatEnd == 1 {
-		return nil
-	}
-	common = &model.CommonMessage{
-		MessageType:   method,
-		UserName:      m.User.Nickname,
-		UserID:        m.User.Id,
-		UserDisplayId: m.User.DisplayId,
-		RoomID:        m.Common.RoomId,
-		Content:       m.Common.Describe,
-		Timestamp:     m.Common.CreateTime,
-	}
-	giftMessage := model.NewGiftMessage(m)
-	giftMessage.ID = int64(id)
-	giftMessage.RoomDisplayId = h.roomDisplayId
-	if err := giftMessage.Insert(); err != nil {
-		logger.Warn().Str("liveid", h.roomDisplayId).Err(err).
-			Msgf("Failed to insert gift message: %v", m)
-		return err
-	} else {
-		//logger.Debug().Str("liveid", h.roomDisplayId).Msgf("insert new giftmessage [%d]%v", giftMessage.ID, giftMessage.Message)
-	}*/
+	case platform.WebcastGiftMessage:
+		m := msg.(*dystruct.Webcast_Im_GiftMessage)
+		content = fmt.Sprintf("[%v]: %v", m.User.Nickname, m.Common.Describe)
 	case platform.WebcastChatMessage:
 		m := msg.(*dystruct.Webcast_Im_ChatMessage)
 		content = fmt.Sprintf("[%v]: %v", m.User.Nickname, m.Content)
