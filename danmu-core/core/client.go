@@ -243,7 +243,7 @@ func (c *Client) connectWebsocket(i int) bool {
 		var resp *http.Response
 		c.conn, resp, err = websocket.DefaultDialer.Dial(wssUrl, headers)
 		if err != nil {
-			logger.Warn().Str("liveurl", c.liveurl).Str("status", resp.Status).Err(err).Msg("重连失败")
+			logger.Warn().Str("liveurl", c.liveurl).Interface("resp", resp).Err(err).Msg("重连失败")
 			time.Sleep(5 * time.Second)
 		} else {
 			logger.Info().Str("liveurl", c.liveurl).Msg("连接成功")
