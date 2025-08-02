@@ -360,7 +360,7 @@ func (c *Client) write(data []byte) error {
 	if conn == nil {
 		return fmt.Errorf("connection not available")
 	}
-	conn.SetWriteDeadline(time.Now().Add(time.Second * 5))
+	conn.SetWriteDeadline(time.Now().Add(time.Second * 8))
 	return conn.WriteMessage(websocket.BinaryMessage, data)
 }
 
@@ -371,7 +371,7 @@ func (c *Client) read() (int, []byte, error) {
 	if conn == nil {
 		return 0, nil, fmt.Errorf("connection not available")
 	}
-	conn.SetReadDeadline(time.Now().Add(time.Second * 5))
+	conn.SetReadDeadline(time.Now().Add(time.Second * 120))
 	return conn.ReadMessage()
 }
 
