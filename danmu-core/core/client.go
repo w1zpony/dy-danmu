@@ -324,7 +324,14 @@ func (c *Client) processMsg() {
 	for {
 		select {
 		case <-c.ctx.Done():
-			return
+			for response, ok := <-c.RecvMsg; ; {
+				if !ok {
+					logger.Info().Str("liveurl", c.liveurl).Msg("Channel closed, Stop ProcessingRecvMessage()")
+					c.RecvMsg = nil
+					return
+				}
+				c.emit(response)
+			}
 
 		case response, ok := <-c.RecvMsg:
 			if !ok {
