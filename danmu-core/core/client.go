@@ -161,11 +161,6 @@ func (c *Client) close() {
 	}
 	c.connMu.Unlock()
 
-	if c.RecvMsg != nil {
-		close(c.RecvMsg)
-		c.RecvMsg = nil
-	}
-
 	logger.Info().Str("liveurl", c.liveurl).Msg("客户端已关闭")
 }
 
@@ -282,6 +277,7 @@ func (c *Client) heartbeat() {
 }
 
 func (c *Client) fetchMessage() {
+	defer close(c.RecvMsg)
 	for {
 		select {
 		case <-c.ctx.Done():
@@ -321,20 +317,12 @@ func (c *Client) fetchMessage() {
 }
 
 func (c *Client) processMsg() {
-	for {
-		select {
-		case <-c.ctx.Done():
-			return
 
-		case response, ok := <-c.RecvMsg:
-			if !ok {
-				logger.Info().Str("liveurl", c.liveurl).Msg("Channel closed, Stop ProcessingRecvMessage()")
-				c.RecvMsg = nil
-				return
-			}
-			c.emit(response)
-		}
+	for msg := range c.RecvMsg {
+		c.emit(msg)
 	}
+	logger.Info().Str("liveurl", c.liveurl).Msg("Channel closed, Stop ProcessingRecvMessage()")
+	c.RecvMsg = nil
 }
 
 func (c *Client) checkStreamTask() {
@@ -360,7 +348,7 @@ func (c *Client) write(data []byte) error {
 	if conn == nil {
 		return fmt.Errorf("connection not available")
 	}
-	conn.SetWriteDeadline(time.Now().Add(time.Second * 5))
+	conn.SetWriteDeadline(time.Now().Add(time.Second * 8))
 	return conn.WriteMessage(websocket.BinaryMessage, data)
 }
 
@@ -371,7 +359,7 @@ func (c *Client) read() (int, []byte, error) {
 	if conn == nil {
 		return 0, nil, fmt.Errorf("connection not available")
 	}
-	conn.SetReadDeadline(time.Now().Add(time.Second * 5))
+	conn.SetReadDeadline(time.Now().Add(time.Second * 120))
 	return conn.ReadMessage()
 }
 
