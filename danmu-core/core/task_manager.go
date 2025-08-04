@@ -10,6 +10,7 @@ import (
 
 var TaskMap map[int64]*Task
 var muMap map[int64]*sync.Mutex
+var mapMutex sync.RWMutex
 
 type Task struct {
 	url      string
@@ -34,29 +35,43 @@ func InitTaskManager() {
 	TaskMap = make(map[int64]*Task, len(confs))
 	muMap = make(map[int64]*sync.Mutex, len(confs))
 	for _, conf := range confs {
-		if err := Add(conf); err != nil {
-			logger.Warn().Err(err).Str("liveurl", conf.URL).Msg("Add task failed")
-		}
+		go func(c *model.LiveConf) {
+			if err := Add(c); err != nil {
+				logger.Warn().Err(err).Str("liveurl", c.URL).Msg("Add task failed")
+			}
+		}(conf)
 	}
 }
 
 func Add(conf *model.LiveConf) error {
-	if _, ok := muMap[conf.ID]; ok {
+	mapMutex.RLock()
+	_, ok := muMap[conf.ID]
+	mapMutex.RUnlock()
+
+	if ok {
+		logger.Info().Str("liveurl", conf.URL).Msg("task already exists")
+		return nil
+	}
+
+	mapMutex.Lock()
+	// Double-check after acquiring write lock
+	if _, exists := muMap[conf.ID]; exists {
+		mapMutex.Unlock()
 		logger.Info().Str("liveurl", conf.URL).Msg("task already exists")
 		return nil
 	}
 	muMap[conf.ID] = &sync.Mutex{}
-	mu, ok := muMap[conf.ID]
-	if !ok {
-		logger.Info().Int64("id", conf.ID).Msg("task not found")
-		return nil
-	}
+	mu := muMap[conf.ID]
+	mapMutex.Unlock()
+
 	mu.Lock()
 	defer mu.Unlock()
 	client := MakeClient(conf)
 	if client == nil {
 		logger.Warn().Str("liveurl", conf.URL).Msg("MakeClient failed")
+		mapMutex.Lock()
 		delete(muMap, conf.ID)
+		mapMutex.Unlock()
 		return fmt.Errorf("MakeClient failed,conf: %v", conf)
 	}
 	task := &Task{
@@ -75,32 +90,42 @@ func Add(conf *model.LiveConf) error {
 	if conf.Enable {
 		task.client.Start()
 	}
+	mapMutex.Lock()
 	TaskMap[conf.ID] = task
+	mapMutex.Unlock()
 	return nil
 }
 
 func Update(conf *model.LiveConf) error {
+	mapMutex.RLock()
 	mu, ok := muMap[conf.ID]
 	if !ok {
+		mapMutex.RUnlock()
 		logger.Info().Int64("id", conf.ID).Msg("task not found")
 		return nil
 	}
-	mu.Lock()
-	defer mu.Unlock()
-	var task *Task
-	task, ok = TaskMap[conf.ID]
-	if !ok {
+	task, taskExists := TaskMap[conf.ID]
+	mapMutex.RUnlock()
+
+	if !taskExists {
 		logger.Warn().Int64("id", conf.ID).Msg("task not found")
 		return fmt.Errorf("task not found")
 	}
+
+	mu.Lock()
+	defer mu.Unlock()
 	if conf.URL != task.url {
 		task.client.Stop()
+		mapMutex.Lock()
 		delete(TaskMap, conf.ID)
+		mapMutex.Unlock()
 
 		client := MakeClient(conf)
 		if client == nil {
 			logger.Warn().Str("liveurl", conf.URL).Msg("MakeClient failed")
+			mapMutex.Lock()
 			delete(muMap, conf.ID)
+			mapMutex.Unlock()
 			return fmt.Errorf("MakeClient failed,conf: %v", conf)
 		}
 		task := &Task{
@@ -119,7 +144,9 @@ func Update(conf *model.LiveConf) error {
 		if conf.Enable {
 			task.client.Start()
 		}
+		mapMutex.Lock()
 		TaskMap[conf.ID] = task
+		mapMutex.Unlock()
 		return nil
 	}
 	if conf.Enable != task.client.enable.Load() {
@@ -128,31 +155,26 @@ func Update(conf *model.LiveConf) error {
 	return nil
 }
 func Delete(id int64) error {
+	mapMutex.RLock()
 	mu, ok := muMap[id]
 	if !ok {
+		mapMutex.RUnlock()
 		logger.Info().Int64("id", id).Msg("task not found")
 		return nil
 	}
-	mu.Lock()
-	defer mu.Unlock()
-	if task, ok := TaskMap[id]; ok {
-		task.client.Stop()
-		delete(TaskMap, id)
-	}
-	delete(muMap, id)
-	return nil
-}
+	task, taskExists := TaskMap[id]
+	mapMutex.RUnlock()
 
-func Stop(id int64) error {
-	mu, ok := muMap[id]
-	if !ok {
-		logger.Info().Int64("id", id).Msg("task not found")
-		return nil
-	}
 	mu.Lock()
 	defer mu.Unlock()
-	if task, ok := TaskMap[id]; ok {
+
+	if taskExists {
 		task.client.Stop()
 	}
+
+	mapMutex.Lock()
+	delete(TaskMap, id)
+	delete(muMap, id)
+	mapMutex.Unlock()
 	return nil
 }
