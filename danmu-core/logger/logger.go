@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"danmu-core/setting"
+	"danmu-core/conf"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,29 +14,29 @@ import (
 
 var Logger zerolog.Logger
 
-func init() {
+func Init(cfg *conf.Log) {
 	// 创建日志目录
-	if err := os.MkdirAll(setting.LogSetting.LogSavePath, 0755); err != nil {
+	if err := os.MkdirAll(cfg.LogSavePath, 0755); err != nil {
 		panic(fmt.Sprintf("create log directory failed: %v", err))
 	}
 	// 配置日志分片
 	fileLogger := &lumberjack.Logger{
-		Filename:   filepath.Join(setting.LogSetting.LogSavePath, setting.LogSetting.LogFileName),
-		MaxSize:    setting.LogSetting.MaxSize,
-		MaxBackups: setting.LogSetting.MaxBackups,
-		MaxAge:     setting.LogSetting.MaxAge,
-		Compress:   setting.LogSetting.Compress,
+		Filename:   filepath.Join(cfg.LogSavePath, cfg.LogFileName),
+		MaxSize:    cfg.MaxSize,
+		MaxBackups: cfg.MaxBackups,
+		MaxAge:     cfg.MaxAge,
+		Compress:   cfg.Compress,
 	}
 	// 设置日志级别
-	level := getLogLevel(setting.LogSetting.LogLevel)
+	level := getLogLevel(cfg.LogLevel)
 	// 设置时间格式
-	zerolog.TimeFieldFormat = setting.LogSetting.TimeFormat
+	zerolog.TimeFieldFormat = cfg.TimeFormat
 	var writer zerolog.LevelWriter
 	if level == zerolog.DebugLevel {
 		// 配置带颜色的控制台输出
 		consoleWriter := zerolog.ConsoleWriter{
 			Out:        os.Stdout,
-			TimeFormat: setting.LogSetting.TimeFormat,
+			TimeFormat: cfg.TimeFormat,
 			NoColor:    false,
 		}
 		// 同时输出到控制台和文件

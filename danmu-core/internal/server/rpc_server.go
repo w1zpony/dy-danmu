@@ -1,10 +1,10 @@
 package server
 
 import (
+	"danmu-core/conf"
 	"danmu-core/generated/api"
 	"danmu-core/internal/service"
 	"danmu-core/logger"
-	"danmu-core/setting"
 	"fmt"
 	"net"
 	"time"
@@ -15,18 +15,19 @@ import (
 
 type RPCServer struct {
 	server *grpc.Server
+	cfg    *conf.Rpc
 }
 
-func NewRPCServer() *RPCServer {
+func NewRPCServer(cfg *conf.Rpc) *RPCServer {
 	// 创建 gRPC 服务器选项
 	opts := []grpc.ServerOption{
 		grpc.KeepaliveParams(keepalive.ServerParameters{
-			MaxConnectionIdle: time.Duration(setting.RpcSetting.ConnectTimeout) * time.Second,
-			MaxConnectionAge:  time.Duration(setting.RpcSetting.ConnectTimeout) * time.Second,
-			Time:              time.Duration(setting.RpcSetting.ConnectTimeout) * time.Second,
-			Timeout:           time.Duration(setting.RpcSetting.ConnectTimeout) * time.Second,
+			MaxConnectionIdle: time.Duration(cfg.ConnectTimeout) * time.Second,
+			MaxConnectionAge:  time.Duration(cfg.ConnectTimeout) * time.Second,
+			Time:              time.Duration(cfg.ConnectTimeout) * time.Second,
+			Timeout:           time.Duration(cfg.ConnectTimeout) * time.Second,
 		}),
-		grpc.MaxConcurrentStreams(setting.RpcSetting.MaxOpenConns),
+		grpc.MaxConcurrentStreams(cfg.MaxOpenConns),
 	}
 
 	// 创建 gRPC 服务器
@@ -34,6 +35,7 @@ func NewRPCServer() *RPCServer {
 
 	return &RPCServer{
 		server: server,
+		cfg:    cfg,
 	}
 }
 
@@ -42,7 +44,7 @@ func (s *RPCServer) Start() error {
 	api.RegisterLiveServiceServer(s.server, service.NewLiveServer())
 
 	// 创建监听器
-	addr := fmt.Sprintf("%s:%s", setting.RpcSetting.Host, setting.RpcSetting.Port)
+	addr := fmt.Sprintf("%s:%s", s.cfg.Host, s.cfg.Port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)

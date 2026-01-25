@@ -1,0 +1,25 @@
+database:
+  Type: "postgres"
+  User: "postgres"
+  Password: "ppzxc"
+  Host: "localhost"
+  Port: "5432"
+  DBName: "dy"
+  SearchPath: "live"
+
+log:
+  LogSavePath: "./logs"
+  LogFileName: "app.log"
+  MaxSize: 10        # 每个日志文件的最大尺寸，单位是 MB
+  MaxBackups: 5      # 保留的旧文件最大数量
+  MaxAge: 30         # 保留的旧文件最大天数
+  Compress: true     # 是否压缩旧文件
+  LogLevel: "debug"   # 日志级别: debug, info, warn, error
+  TimeFormat: "2006-01-02 15:04:05"
+
+rpc:
+  Host: "0.0.0.0"
+  Port: "50051"
+  MaxIdleConns: 10
+  MaxOpenConns: 100
+  ConnectTimeout: 5  # seconds

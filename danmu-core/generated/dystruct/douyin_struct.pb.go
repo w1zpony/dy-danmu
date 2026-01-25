@@ -154631,7 +154631,7 @@ func (x *Webcast_Data_ThemedCompetitionSetting) GetMaxScoreCandidates() []uint64
 
 type Webcast_Data_ThemedCompetitionInfo struct {
 	state                  protoimpl.MessageState                               `protogen:"open.v1"`
-	Setting                *Webcast_Data_ThemedCompetitionSetting               `protobuf:"bytes,1,opt,name=setting,proto3" json:"setting,omitempty"`
+	Setting                *Webcast_Data_ThemedCompetitionSetting               `protobuf:"bytes,1,opt,name=conf,proto3" json:"conf,omitempty"`
 	UserIdToScore          map[int64]*Webcast_Data_ThemedCompetitionInfo_Score  `protobuf:"bytes,2,rep,name=user_id_to_score,json=userIdToScore,proto3" json:"user_id_to_score,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Status                 int32                                                `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`
 	CompetitionId          uint64                                               `protobuf:"varint,4,opt,name=competition_id,json=competitionId,proto3" json:"competition_id,omitempty"`
@@ -228100,7 +228100,7 @@ var file_douyin_struct_proto_depIdxs = []int32{
 	1979, // 3415: dystruct.Webcast.Data.LinkmicStarWishInfo.player_info:type_name -> dystruct.Webcast.Data.LinkmicStarWishPlayerInfo
 	2129, // 3416: dystruct.Webcast.Data.LinkmicStarWishInfo.star_gifts:type_name -> dystruct.Webcast.Data.StarGift
 	2126, // 3417: dystruct.Webcast.Data.LinkmicStarWishInfo.performance_info:type_name -> dystruct.Webcast.Data.StarWishPerformanceInfo
-	1981, // 3418: dystruct.Webcast.Data.ThemedCompetitionInfo.setting:type_name -> dystruct.Webcast.Data.ThemedCompetitionSetting
+	1981, // 3418: dystruct.Webcast.Data.ThemedCompetitionInfo.conf:type_name -> dystruct.Webcast.Data.ThemedCompetitionSetting
 	2433, // 3419: dystruct.Webcast.Data.ThemedCompetitionInfo.user_id_to_score:type_name -> dystruct.Webcast.Data.ThemedCompetitionInfo.UserIdToScoreEntry
 	2434, // 3420: dystruct.Webcast.Data.ThemedCompetitionInfo.user_open_id_to_score:type_name -> dystruct.Webcast.Data.ThemedCompetitionInfo.UserOpenIdToScoreEntry
 	1987, // 3421: dystruct.Webcast.Data.LotteryInfo.prize_info:type_name -> dystruct.Webcast.Data.LotteryPrize

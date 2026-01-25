@@ -1,0 +1,11 @@
+"Sample Room":
+  room_display_id: "123456"
+  url: "https://live.douyin.com/123456"
+  cron: "0 */15 * * * ?"
+  enable: true
+
+"Another Room":
+  room_display_id: "789012"
+  url: "https://live.douyin.com/789012"
+  cron: "0 */15 * * * ?"
+  enable: false

@@ -97,7 +97,7 @@ var newMessage = map[string]func() protoreflect.ProtoMessage{
 	"WebcastFansclubMessage": func() protoreflect.ProtoMessage { return &dystruct.Webcast_Im_FansclubMessage{} },
 
 	// 直播控制消息（禁言、清屏、设置管理员等操作）
-	// Live broadcast control message (operations such as muting, clearing the screen, setting administrators)
+	// Live broadcast control message (operations such as muting, clearing the screen, conf administrators)
 	"WebcastControlMessage": func() protoreflect.ProtoMessage { return &dystruct.Webcast_Im_ControlMessage{} },
 
 	// 表情聊天消息（带Emoji表情的弹幕）
@@ -450,7 +450,7 @@ var newMessage = map[string]func() protoreflect.ProtoMessage{
 	},
 
 	// 连麦设置通知消息（连麦功能参数调整通知）
-	// Link setting notification message (linked streaming configuration changes notification)
+	// Link conf notification message (linked streaming configuration changes notification)
 	"WebcastLinkSettingNotifyMessage": func() protoreflect.ProtoMessage {
 		return &dystruct.Webcast_Im_LinkSettingNotifyMessage{}
 	},

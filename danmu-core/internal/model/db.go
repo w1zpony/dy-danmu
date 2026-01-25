@@ -1,8 +1,8 @@
 package model
 
 import (
+	"danmu-core/conf"
 	"danmu-core/logger"
-	"danmu-core/setting"
 	"fmt"
 
 	"gorm.io/driver/postgres"
@@ -11,26 +11,27 @@ import (
 
 var DB *gorm.DB
 
-func init() {
+func Init(cfg *conf.Database) error {
 	var dsn = fmt.Sprintf("user=%s password=%s host=%s dbname=%s port=%s sslmode=disable search_path=%s",
-		setting.DatabaseSetting.User,
-		setting.DatabaseSetting.Password,
-		setting.DatabaseSetting.Host,
-		setting.DatabaseSetting.DBName,
-		setting.DatabaseSetting.Port,
-		setting.DatabaseSetting.SearchPath)
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.DBName,
+		cfg.Port,
+		cfg.SearchPath)
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		logger.Fatal().Err(err).Msg("db.Setup failure")
-		return
+		logger.Error().Err(err).Msg("db.Setup failure")
+		return err
 	}
 	/*	sqlDB, err := DB.DB()
 		if err != nil {
 			log.Fatalf("failed to get Sql DB: %v", err)
 		}
-		sqlDB.SetMaxIdleConns(settings.DatabaseSetting.MaxIdleConns)
-		sqlDB.SetMaxOpenConns(settings.DatabaseSetting.MaxOpenConns)*/
+		sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
+		sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)*/
+	return nil
 }
 
 // Close closes the database connection
